@@ -15,3 +15,4 @@ test.*
 !/public/systemjs.config.js
 /public/uploads/
 !/public/gulpfile.js
+*.xml
