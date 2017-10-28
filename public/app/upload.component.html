@@ -1,0 +1,13 @@
+<h1 class="section-title">Upload new race:</h1>
+
+<p class="bg-danger">Make sure not to edit the file in any way before uploading, this includes changing the file name!</p>
+
+<form action="/upload" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <input class="uploadForm" type="file" name="upload" accept=".csv" required
+               (change)="fileChange($event)" #fileInput>
+        <br/>
+        <p *ngIf="message" class="bg-warning">{{message}}</p>
+        <button (click)="fileUploadButton()" class="btn btn-default" [disabled]="(disableButton)">Upload</button>
+    </div>
+</form>

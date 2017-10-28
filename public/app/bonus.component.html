@@ -1,0 +1,46 @@
+<div class="forms">
+    <div class="bonus-points col-md-3">
+        <h1 class="section-title">Add Bonus Points</h1>
+        <form (ngSubmit)="submitBonus()">
+            <p *ngIf="message">{{message}}</p>
+
+            <div class="form-group">
+                <label for="driverName">Driver Name:</label>
+                <select id="driverName" name="driverName" required [(ngModel)]="driverId" class="form-control">
+                    <option *ngFor="let driver of drivers" value="{{driver.driverId}}">
+                        {{driver.driverName}} - {{driver.driverId}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason:</label>
+                <input id="reason" name="reason" type="text" required [(ngModel)]="reason" [ngModelOptions]="{standalone: true}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="adjustmentAmt">Currency adjustment:</label>
+                <input id="adjustmentAmt" name="adjustmentAmt" type="number" value="0" required [(ngModel)]="currencyAdj" class="form-control">
+            </div>
+            <input type="submit" value="Submit" class="btn btn-default">
+        </form>
+    </div>
+
+
+
+
+    <div class="new-driver col-md-3">
+        <h1 class="section-title">Add new driver</h1>
+        <p *ngIf="newDriverMessage">{{newDriverMessage}}</p>
+
+        <form (ngSubmit)="submitNewDriver()">
+            <div class="form-group">
+                <label for="newDriverId">Driver ID:</label>
+                <input id="newDriverId" type="number" required [(ngModel)]="newDriverId" [ngModelOptions]="{standalone: true}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="newDriverName">Driver Name:</label>
+                <input id="newDriverName" type="text" required [(ngModel)]="newDriverName" [ngModelOptions]="{standalone: true}" class="form-control">
+            </div>
+            <input type="submit" value="Submit" class="btn btn-default">
+        </form>
+    </div>
+</div>

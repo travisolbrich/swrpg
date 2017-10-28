@@ -1,0 +1,17 @@
+.idea
+node_modules
+jspm_packages
+npm-debug.*
+link-checker-results.txt
+*.js.map
+e2e/**/*.js
+e2e/**/*.js.map
+*.js
+_test-output
+_temp
+secrets.json
+typings/
+test.*
+!/public/systemjs.config.js
+/public/uploads/
+!/public/gulpfile.js

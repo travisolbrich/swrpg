@@ -1,0 +1,17 @@
+<h1 class="section-title">Currency</h1>
+
+<div class="col-md-4">
+    <table class="table table-striped">
+        <tr>
+            <th>Driver Name</th>
+            <th>Penalty/Bonus</th>
+            <th>Penalty Bonus Amount</th>
+        </tr>
+        <tr *ngFor="let currency of currencies">
+            <td><a [routerLink]="['/drivers', currency.driverId]">{{currency.driverName}}</a></td>
+            <td>{{currency.reason}}</td>
+            <td [class.negative]="currency.currencyAdjustment < 0">
+                {{currency.currencyAdjustment | currency:'USD':true}}</td>
+        </tr>
+    </table>
+</div>

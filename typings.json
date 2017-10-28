@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "bluebird": "registry:npm/bluebird#3.4.1+20160909132857",
+    "body-parser": "registry:npm/body-parser#1.15.2+20161116154925",
+    "express": "registry:npm/express#4.14.0+20160925001530",
+    "express-formidable": "registry:dt/express-formidable#1.0.0+20161116192001",
+    "formidable": "registry:dt/formidable#1.0.16+20160510010627",
+    "mysql": "registry:npm/mysql#2.11.1+20161114232222"
+  },
+  "globalDependencies": {
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160726072212"
+  }
+}

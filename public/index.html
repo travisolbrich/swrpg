@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>USRC Results</title>
+
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <!--<base href="/">-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Bootstrap css link-->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+
+    <!--my css page-->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="app/assets/images/favicon.ico" type="image/gif" sizes="any">
+
+    <!-- Core systemJS / shim / etc files -->
+    <script src="bundle/core-deps.js"></script>
+  
+  <!--Auth0-->
+    <script src="http://cdn.auth0.com/js/lock-9.0.min.js"></script>
+    <!-- This file tells SystemJS how to load stuff. If there's a depenency or app file, it goes there
+    before pulling files individually. -->
+    <script src="systemjs.config.js"></script>
+
+    <!-- This file contains all of the node dependencies your app uses (angular, etc) -->
+    <script src="bundle/dependencies.js"></script>
+
+    <!-- Uncomment this line to use bundled application files -->
+    <!--<script src="bundle/app.js"></script>-->
+
+    <script>
+      System.import('app').catch(function(err){ console.error(err); });
+    </script>
+</head>
+
+<body>
+    <div class="content">
+        <my-app>Loading!</my-app>
+    </div>
+</body>
+</html>

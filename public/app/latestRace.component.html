@@ -1,0 +1,27 @@
+<div class="col-md-5">
+    <h1 class="section-title">Latest Race</h1>
+
+    <table class="table table-striped">
+        <tr>
+            <th>Pos</th>
+            <th>Car #</th>
+            <th>Driver</th>
+            <th>Start<br/>Pos.</th>
+            <th>Interval</th>
+            <th>Inc</th>
+            <th>Earnings</th>
+            <th>Total<br/>Funds</th>
+        </tr>
+        <tr *ngFor="let result of results">
+            <td>{{result.finPos}}</td>
+            <td>{{result.carNum}}</td>
+            <td><a [routerLink]="['/drivers', result.driverId]">{{result.driverName}}</a></td>
+            <td>{{result.startPos}}</td>
+            <td *ngIf="result.interval === '-00.000'">--</td>
+            <td *ngIf="result.interval != '-00.000'">{{result.interval}}</td>
+            <td>{{result.inc}}</td>
+            <td [class.negative]="result.raceEarnings < 0">{{result.raceEarnings | currency:'USD':true}}</td>
+            <td>{{result.totalFunds | currency:'USD':true}}</td>
+        </tr>
+    </table>
+</div>
