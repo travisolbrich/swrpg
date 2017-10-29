@@ -1,6 +1,6 @@
 import * as mysql from "mysql";
 
-let secrets: any = require("./../secrets.json");
+let secrets: any = require("./../../secrets.json");
 
 let pool: any = mysql.createPool({
     connectionLimit: 100,
