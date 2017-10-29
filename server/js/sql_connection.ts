@@ -12,7 +12,9 @@ let pool: any = mysql.createPool({
 });
 
 export namespace SQL {
-    export function selectFromDatabase(req: any, res: any, query: string) {
+    export function selectFromDatabase(req: any, res: any, query: string) { // basically just retrieves a select call and returns it as json
+        req = null;
+
         pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 res.json({"code": 100, "status": "Error in connection database"});
@@ -20,6 +22,7 @@ export namespace SQL {
             }
 
             connection.on("error", function (err: any) {
+                if (err) return false;
                 res.json({"code": 100, "status": "Error in connection database"});
             });
 
@@ -32,7 +35,7 @@ export namespace SQL {
         });
     }
 
-    export function insertIntoDatabase(query: string) { // this is super dirty, and actually probably super dangerous
+    export function insertIntoDatabase(query: string) { // sends a query to the database, super dirty, proba- it's dangerous
         pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err.stack);

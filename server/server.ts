@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as mysql from "mysql";
 import {SQL} from "./js/sql_connection";
 
 let secrets = require("./../secrets.json");
@@ -18,7 +19,11 @@ app.use("/node_modules", express.static(__dirname + "/node_modules"))
 app.get("/api/weapons", function(req: any, res: any){
     let query: string = "SELECT * FROM swrpg.weapons;";
 
-    console.log("Getting weapons");
+    SQL.selectFromDatabase(req, res, query);
+});
+
+app.get("/api/weapon/:key", function(req: any, res: any){
+    let query: string = "SELECT * FROM swrpg.weapons WHERE weapons.key = " + mysql.escape(req.params.key) + ";";
 
     SQL.selectFromDatabase(req, res, query);
 });
