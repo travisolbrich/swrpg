@@ -16,3 +16,4 @@ The secrets file follows the below format:
   }
 }
 ```
+There is a `sample_secrets.json` file in the top most directory, you can edit that one as it's already in the correct place directory wise. Just make sure to rename it to `secrets.json`.
