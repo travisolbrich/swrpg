@@ -12,18 +12,23 @@ app.use("/node_modules", express.static(__dirname + "/node_modules"))
     .use(express.static(__dirname + "/public/"))
     .use(bodyParser.urlencoded({extended: false}))
     .use(bodyParser.json(null));
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // <editor-fold desc="API links">
-app.get("/api/weapons", function(req: any, res: any){
+app.get("/api/weapons", function(req: any, res: any){ // get all weapons, with all info
     let query: string = "SELECT * FROM swrpg.weapons;";
 
     SQL.selectFromDatabase(req, res, query);
 });
 
-app.get("/api/weapon/:key", function(req: any, res: any){
+app.get("/api/weapon/:key", function(req: any, res: any){ // get all info for one specific weapon
     let query: string = "SELECT * FROM swrpg.weapons WHERE weapons.key = " + mysql.escape(req.params.key) + ";";
+
+    SQL.selectFromDatabase(req, res, query);
+});
+
+app.get("/api/weapon/:key/sources", function(req: any, res: any){ // gets sources for specific weapon key
+    let query: string = "SELECT * FROM swrpg.weapon_sources where weapon_id =" + mysql.escape(req.params.key) + ";";
 
     SQL.selectFromDatabase(req, res, query);
 });
