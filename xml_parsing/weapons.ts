@@ -120,7 +120,7 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
 
                                 let Source = xmlSource[0]["_"];
 
-                                console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source`) VALUES " +
+                                console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
                                     "('" + weaponID + "', '" + Page + "', '" + Source + "');");
                             } else {
                                 let sources = weapon["Sources"][0]["Source"];
@@ -133,7 +133,7 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
                                     }
                                     let Source = xmlSource["_"];
 
-                                    console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source`) VALUES " +
+                                    console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
                                         "('" + weaponID + "', '" + Page + "', '" + Source + "');");
 
                                     // SQL.insertIntoDatabase( // create query and send to database
