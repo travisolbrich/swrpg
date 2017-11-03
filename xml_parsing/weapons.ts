@@ -23,20 +23,17 @@ fs.readFile(weaponsFile, "utf8", function (err: any, data: any) {
         if (err) return console.log(err); // it's more error logging
         let weapons = result["Weapons"]["Weapon"]; // just to make things easier below
 
-        // let weapon = weapons[81];
-        // console.log(weapon["Key"][0]);
+        // let weapon = weapons[298];
+        // console.log(weapon["Description"]);
 
         // let i = 0;
         // Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
-        //     // addWeapon(weapon);
+        //     addWeapon(weapon);
         //     // addWeaponSource(weapon);
         //     // addWeaponCategories(weapon);
-        //     getWeaponID(weapon["Key"][0]);
-        //     console.log(weapon["Key"][0]);
-        //     i++;
+        //     // console.log(weapon["Key"] + ": " + weapon["Categories"]);
         // }).then(function () {
-        //     console.log(weaponsAdded + " weapons added.");
-        //     console.log(i);
+        //     // console.log(weaponsAdded + " weapons added.");
         // });
     });
 });
@@ -52,39 +49,31 @@ function addWeapon(weapon: any) {
 
             getWeaponID(Key[0]).then(function (weaponID) {
                 if (weaponID === -1) { // if weaponID  is -1, the weapon already exists, so we can ignore it, but if it's not we'll add the weapon
-                    let Name = weapon["Name"].toString().replace("'", "\\'"); // get all the necessary values
+                    let Name = weapon["Name"].toString().replace("'", "\\'");
                     let Description = weapon["Description"].toString().replace("'", "\\'");
                     let SkillKey = weapon["SkillKey"];
                     let Damage = weapon["Damage"];
+                    let DamageAdd = weapon["DamageAdd"];
                     let Crit = weapon["Crit"];
                     let RangeValue = weapon["RangeValue"];
                     let Encumbrance = weapon["Encumbrance"];
                     let HP = weapon["HP"];
                     let Price = weapon["Price"];
                     let Rarity = weapon["Rarity"];
-                    let Type = weapon["Type"];
                     let Restricted = weapon["Restricted"];
+                    let Type = weapon["Type"];
+                    let SizeLow = weapon["SizeLow"];
+                    let SizeHigh = weapon["SizeHigh"];
 
-                    // SQL.insertIntoDatabase( // create query and send to database
-                    //     "INSERT INTO `swrpg`.`weapons` " +
-                    //     "(`key`, `name`, `description`, `skillkey`, `damage`, `crit`, `rangevalue`, `encumbrance`, `hp`, `price`, `rarity`, `type`, `restricted`) VALUES " +
-                    //     "(" +
-                    //     "'" + Key + "', " +
-                    //     "'" + Name + "', " +
-                    //     "'" + Description + "', " +
-                    //     "'" + SkillKey + "', " +
-                    //     "'" + Damage + "', " +
-                    //     "'" + Crit + "', " +
-                    //     "'" + RangeValue + "', " +
-                    //     "'" + Encumbrance + "', " +
-                    //     "'" + HP + "', " +
-                    //     "'" + Price + "', " +
-                    //     "'" + Rarity + "', " +
-                    //     "'" + Type + "', " +
-                    //     "'" + Restricted + "'" +
-                    //     ");"
-                    // );
+                    let query = "INSERT INTO `swrpg`.`weapons` " +
+                        "(`key`, `name`, `description`, `type`, `encumbrance`, `hp`, `price`, `rarity`, `restricted`, `skillkey`, `damage`, `damageAdd`, `crit`, `sizeLow`, `sizeHigh`, `rangeValue`) " +
+                        "VALUES " +
+                        "('" + Key + "', '" + Name + "', '" + Description + "', '" + Type + "', '" + Encumbrance + "', '" + HP + "', '" + Price + "', '" + Rarity + "', '" + Restricted + "', '" + SkillKey + "', '" + Damage + "', '" + DamageAdd + "', '" + Crit + "', '" + SizeLow + "', '" + SizeHigh + "', '" + RangeValue + "');";
+
+
                     console.log("Adding weapon with key " + Key);
+                    // console.log(query);
+                    // SQL.insertIntoDatabase(query);
 
                     isWeaponAdded = true;
                     weaponsAdded++;
@@ -175,7 +164,7 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
 function addWeaponCategories(weapon: any) { // adds weapon sources to db
     return new Promise(function (resolve) {
         try {
-            let isWeaponSourceAdded: boolean = false; // used for the resolve
+            let isWeaponCatAdded: boolean = false; // used for the resolve
             console.log("Attempting to add categories for " + weapon["Name"][0] + " with ID " + (weaponCatsAdded + 1));  // the [0] gets the value, instead of including all the [''] junk
 
             let Key = weapon["Key"];  // get the key first, as we use it to check if the weapon exists yet, in this scenario, don't want to add sources for a weapon that doesn't exist
@@ -237,7 +226,10 @@ function getWeaponSources(weaponKey: any, weaponID: any) {
 
         http.request(options, function (res: any) {
             let data: string = "";  // create blank string to hold body
-            res.on("data", function (body: string) {data += body}); // put body into string we created
+            res.on("data", function (body: string) {
+                data += body;
+            }); // put body into string we created
+
             res.on("end", function () {
                 let apiResponse: any = JSON.parse(data);
 
@@ -262,7 +254,10 @@ function getWeaponCategories(weaponKey: any, weaponID: any) {
 
         http.request(options, function (res: any) {
             let data: string = "";  // create blank string to hold body
-            res.on("data", function (body: string) {data += body}); // put body into string we created
+            res.on("data", function (body: string) {
+                data += body;
+            }); // put body into string we created
+
             res.on("end", function () {
                 let apiResponse: any = JSON.parse(data);
 

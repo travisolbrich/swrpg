@@ -1,4 +1,5 @@
 import * as mysql from "mysql";
+import * as Promise from "bluebird";
 
 let secrets: any = require("./../../secrets.json");
 
@@ -13,42 +14,56 @@ let pool: any = mysql.createPool({
 
 export namespace SQL {
     export function selectFromDatabase(req: any, res: any, query: string) { // basically just retrieves a select call and returns it as json
-        req = null;
+        return new Promise(function (resolve) {
+            req = null;
 
-        pool.getConnection(function (err: any, connection: any) {
-            if (err) {
-                res.json({"code": 100, "status": "Error in connection database"});
-                return;
-            }
-
-            connection.on("error", function (err: any) {
-                if (err) return false;
-                res.json({"code": 100, "status": "Error in connection database"});
-            });
-
-            connection.query(query, function (err: any, rows: any) {
-                connection.release();
-                if (!err) {
-                    res.json(rows);
+            pool.getConnection(function (err: any, connection: any) {
+                if (err) {
+                    res.json({"code": 100, "status": "Error in connection database"});
+                    resolve(false);
                 }
+
+                connection.on("error", function (err: any) {
+                    res.json({"code": 100, "status": "Error in connection database"});
+                    if (err) resolve(false);
+                });
+
+                connection.query(query, function (err: any, rows: any) {
+                    connection.release();
+                    if (!err) {
+                        res.json(rows);
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                });
             });
         });
     }
 
     export function insertIntoDatabase(query: string) { // sends a query to the database, super dirty, proba- it's dangerous
-        pool.getConnection(function (err: any, connection: any) {
-            if (err) {
-                console.error(err.stack);
-                return;
-            }
+        return new Promise(function (resolve) {
+            pool.getConnection(function (err: any, connection: any) {
+                if (err) {
+                    resolve(false);
+                    console.error(err.stack);
+                    return;
+                }
 
-            connection.on("error", function (err: any) {
-                console.error(err.stack);
-            });
+                connection.on("error", function (err: any) {
+                    resolve(false);
+                    console.error(err.stack);
+                });
 
-            connection.query(query, function (err: any) {
-                connection.release();
-                if (err) console.error(err.stack);
+                connection.query(query, function (err: any) {
+                    if (err) {
+                        resolve(false);
+                        console.error(err.stack);
+                    } else {
+                        resolve(true);
+                        connection.release();
+                    }
+                });
             });
         });
     }
