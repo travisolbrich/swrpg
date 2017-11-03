@@ -4,6 +4,7 @@ import * as Promise from "bluebird";
 import * as xml from "xml2js";
 import {SQL} from "../server/js/sql_connection";
 import {log} from "util";
+import {promise} from "selenium-webdriver";
 
 // General vars
 let secrets: any = require("../secrets.json"); // file that contains all the login info and other stuff
@@ -22,16 +23,21 @@ fs.readFile(weaponsFile, "utf8", function (err: any, data: any) {
         if (err) return console.log(err); // it's more error logging
         let weapons = result["Weapons"]["Weapon"]; // just to make things easier below
 
+        // let weapon = weapons[81];
+        // console.log(weapon["Key"][0]);
 
-        // let weapon = weapons[84];
-        // console.log(weapon["Source"][0]["$"]);
-
-        Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
-            // addWeapon(weapon);
-            addWeaponSource(weapon);
-        }).then(function () {
-            console.log(weaponsAdded + " weapons added.");
-        });
+        // let i = 0;
+        // Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
+        //     // addWeapon(weapon);
+        //     // addWeaponSource(weapon);
+        //     // addWeaponCategories(weapon);
+        //     getWeaponID(weapon["Key"][0]);
+        //     console.log(weapon["Key"][0]);
+        //     i++;
+        // }).then(function () {
+        //     console.log(weaponsAdded + " weapons added.");
+        //     console.log(i);
+        // });
     });
 });
 
@@ -120,8 +126,10 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
 
                                 let Source = xmlSource[0]["_"];
 
-                                console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
-                                    "('" + weaponID + "', '" + Page + "', '" + Source + "');");
+                                SQL.insertIntoDatabase( // create query and send to database
+                                    "INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
+                                    "('" + weaponID + "', '" + Page + "', '" + Source + "');"
+                                );
                             } else {
                                 let sources = weapon["Sources"][0]["Source"];
 
@@ -136,10 +144,10 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
                                     console.log("INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
                                         "('" + weaponID + "', '" + Page + "', '" + Source + "');");
 
-                                    // SQL.insertIntoDatabase( // create query and send to database
-                                    //     "INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source`) VALUES " +
-                                    //     "('" + weaponID + "', '" + Page + "', '" + Source + "');"
-                                    // );
+                                    SQL.insertIntoDatabase( // create query and send to database
+                                        "INSERT INTO `swrpg`.`weapon_sources` (`weapon_id`, `page`, `source_book`) VALUES " +
+                                        "('" + weaponID + "', '" + Page + "', '" + Source + "');"
+                                    );
                                 });
                             }
                             console.log("Adding sources for weapon with key " + Key);
@@ -164,6 +172,32 @@ function addWeaponSource(weapon: any) { // adds weapon sources to db
     });
 }
 
+function addWeaponCategories(weapon: any) { // adds weapon sources to db
+    return new Promise(function (resolve) {
+        try {
+            let isWeaponSourceAdded: boolean = false; // used for the resolve
+            console.log("Attempting to add categories for " + weapon["Name"][0] + " with ID " + (weaponCatsAdded + 1));  // the [0] gets the value, instead of including all the [''] junk
+
+            let Key = weapon["Key"];  // get the key first, as we use it to check if the weapon exists yet, in this scenario, don't want to add sources for a weapon that doesn't exist
+
+            getWeaponID(Key).then(function (weaponID) { // first make sure weapon exists in db
+                if (weaponID !== -1) { // Key not found in db, no need to go further
+                    getWeaponCategories(Key, weaponID).then(function (dbCats) {
+                        if (dbCats === -1) { // if dbCats = -1, the weapon does not have categories added yet
+
+                        }
+                    });
+                } else {
+                    console.log("Weapon with key " + Key + " not found in db");
+                }
+            });
+        } catch (exc) {
+            console.log("Something went wrong: " + exc);
+            resolve(false);
+        }
+    });
+}
+
 function getWeaponID(weaponKey: any) {
     return new Promise(function (resolve) {
         let options: any = {
@@ -175,16 +209,16 @@ function getWeaponID(weaponKey: any) {
 
         http.request(options, function (res: any) {
             let data: string = "";  // create blank string to hold body
-            res.on("data", function (body: string) {data += body}); // put body into string we created
+            res.on("data", function (body: string) {
+                data += body;
+            }); // put body into string we created
             res.on("end", function () {
                 let apiResponse: any = JSON.parse(data);
-
-                // console.log(apiResponse[0]);
 
                 if (apiResponse[0] !== undefined) {
                     resolve(apiResponse[0]["id"]);
                 } else {
-                    console.log("Weapon not found with key " + weaponKey);
+                    // console.log("Weapon not found with key " + weaponKey);
                     resolve(-1);
                 }
             });
@@ -197,6 +231,31 @@ function getWeaponSources(weaponKey: any, weaponID: any) {
         let options: any = {
             host: "localhost",
             path: "/api/weapon/" + weaponID + "/sources",
+            method: "GET",
+            port: secrets.port
+        };
+
+        http.request(options, function (res: any) {
+            let data: string = "";  // create blank string to hold body
+            res.on("data", function (body: string) {data += body}); // put body into string we created
+            res.on("end", function () {
+                let apiResponse: any = JSON.parse(data);
+
+                if (apiResponse[0] !== undefined) { // sources for this weapon are not in db yet
+                    resolve(apiResponse);
+                } else {
+                    resolve(-1); // weapon has no sources
+                }
+            });
+        }).end();
+    }); // checks if a weapon already has sources in db
+}
+
+function getWeaponCategories(weaponKey: any, weaponID: any) {
+    return new Promise(function (resolve) {
+        let options: any = {
+            host: "localhost",
+            path: "/api/weapon/" + weaponID + "/categories",
             method: "GET",
             port: secrets.port
         };

@@ -32,6 +32,12 @@ app.get("/api/weapon/:key/sources", function(req: any, res: any){ // gets source
 
     SQL.selectFromDatabase(req, res, query);
 });
+
+app.get("/api/weapon/:key/categories", function(req: any, res: any){ // gets sources for specific weapon key
+    let query: string = "SELECT * FROM swrpg.weapon_categories where weapon_id =" + mysql.escape(req.params.key) + ";";
+
+    SQL.selectFromDatabase(req, res, query);
+});
 // </editor-fold desc="API links">
 
 
