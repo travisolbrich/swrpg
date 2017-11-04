@@ -1,5 +1,6 @@
 import * as mysql from "mysql";
 import * as Promise from "bluebird";
+import {Observable} from "rxjs/Observable";
 
 let secrets: any = require("./../../secrets.json");
 

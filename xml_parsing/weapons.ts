@@ -6,6 +6,17 @@ import {SQL} from "../server/js/sql_connection";
 import {log} from "util";
 import {promise} from "selenium-webdriver";
 
+import {WeaponService} from "../server/weapon.service";
+import {Weapon} from "../server/weapon.model";
+import {Observable} from "rxjs/Observable";
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeAll';
+import 'rxjs/add/observable/from';
+import 'rxjs/add/observable/of';
+import {fromPromise} from "rxjs/observable/fromPromise";
+import {Subject} from "rxjs/Subject";
+
 // General vars
 let secrets: any = require("../secrets.json"); // file that contains all the login info and other stuff
 let weaponsFile = "./Weapons.xml"; // file that contains all the weapons, I just copied the file from my swrpg directory
@@ -23,73 +34,36 @@ fs.readFile(weaponsFile, "utf8", function (err: any, data: any) {
         if (err) return console.log(err); // it's more error logging
         let weapons = result["Weapons"]["Weapon"]; // just to make things easier below
 
-        // let weapon = weapons[298];
-        // console.log(weapon["Description"]);
+        let weaponInsertions: Array<Observable<boolean>> = [];
 
-        // let i = 0;
-        Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
-            addWeapon(weapon);
-            // addWeaponSource(weapon);
-            // addWeaponCategories(weapon);
-            // console.log(weapon["Key"] + ": " + weapon["Categories"]);
-        }, {concurrency: 1}).then(function () {
-            console.log(weaponsAdded + " weapons added.");
-            // console.log(weaponSourcesAdded + " weapon sources added.");
-            // console.log(weaponCatsAdded + " weapons categories added.");
+        weapons.forEach(w => {
+            let weapon = new Weapon(w);
+
+            weaponInsertions.push(addWeapon(weapon));
         });
+
+        let concurrencyLimit = 1;
+
+        Observable.from(weaponInsertions)
+            .mergeAll(concurrencyLimit)
+            .subscribe(result => console.log(result), error => console.log(error))
+
     });
 });
 
 // <editor-fold desc="Functions">
-function addWeapon(weapon: any) {
-    return new Promise(function (resolve) {
-        try {
-            let isWeaponAdded: boolean = false; // used for the resolve
-            let Key = weapon["Key"];  // get the key first, as we use it to check if the weapon exists already
-
-            getWeaponID(Key[0]).then(function (weaponID) {
-                if (weaponID === -1) { // if weaponID  is -1, the weapon already exists, so we can ignore it, but if it's not we'll add the weapon
-                    let Name = weapon["Name"].toString().replace("'", "\\'");
-                    let Description = weapon["Description"].toString().replace("'", "\\'");
-                    let SkillKey = weapon["SkillKey"];
-                    let Damage = weapon["Damage"];
-                    let DamageAdd = weapon["DamageAdd"];
-                    let Crit = weapon["Crit"];
-                    let RangeValue = weapon["RangeValue"];
-                    let Encumbrance = weapon["Encumbrance"];
-                    let HP = weapon["HP"];
-                    let Price = weapon["Price"];
-                    let Rarity = weapon["Rarity"];
-                    let Restricted = weapon["Restricted"];
-                    let Type = weapon["Type"];
-                    let SizeLow = weapon["SizeLow"];
-                    let SizeHigh = weapon["SizeHigh"];
-
-                    let query = "INSERT INTO `swrpg`.`weapons` " +
-                        "(`key`, `name`, `description`, `type`, `encumbrance`, `hp`, `price`, `rarity`, `restricted`, `skillkey`, `damage`, `damageAdd`, `crit`, `sizeLow`, `sizeHigh`, `rangeValue`) " +
-                        "VALUES " +
-                        "('" + Key + "', '" + Name + "', '" + Description + "', '" + Type + "', '" + Encumbrance + "', '" + HP + "', '" + Price + "', '" + Rarity + "', '" + Restricted + "', '" + SkillKey + "', '" + Damage + "', '" + DamageAdd + "', '" + Crit + "', '" + SizeLow + "', '" + SizeHigh + "', '" + RangeValue + "');";
-
-
-                    console.log("Attempting to add " + weapon["Name"][0] + " as ID " + (weaponsAdded + 1));
-
-                    console.log("Adding weapon with key " + Key);
-                    SQL.insertIntoDatabase(query).then(function (resolved) {
-                        isWeaponAdded = true;
-                        weaponsAdded++;
-                        resolve(resolved);
-                    });
-                } else {
-                    console.log("Weapon with key " + Key + " already exists with ID " + weaponID);
-                }
-            }).then(function () {
-                resolve(isWeaponAdded);
-            });
-        } catch (exc) {
-            console.log("Something went wrong: " + exc);
-            resolve(false);
+function addWeapon(weapon: Weapon): Observable<boolean> {
+    const weaponIdExists = fromPromise(getWeaponID(weapon.key)).map(weaponId => weaponId != -1);
+    return weaponIdExists.flatMap(exists => {
+        if (exists) {
+            console.log("ID exists (" + weapon.key + ")")
+            return Observable.of(false);
+        } else {
+            let weaponService = new WeaponService();
+            return weaponService.saveWeapon(weapon);
         }
-    });
+    })
+
 }
 
 function addWeaponSource(weapon: any) { // adds weapon sources to db
