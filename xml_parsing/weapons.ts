@@ -27,14 +27,16 @@ fs.readFile(weaponsFile, "utf8", function (err: any, data: any) {
         // console.log(weapon["Description"]);
 
         // let i = 0;
-        // Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
-        //     addWeapon(weapon);
-        //     // addWeaponSource(weapon);
-        //     // addWeaponCategories(weapon);
-        //     // console.log(weapon["Key"] + ": " + weapon["Categories"]);
-        // }).then(function () {
-        //     // console.log(weaponsAdded + " weapons added.");
-        // });
+        Promise.map(weapons, function (weapon) { // an async for loop for the array of weapons to keep everything in order
+            addWeapon(weapon);
+            // addWeaponSource(weapon);
+            // addWeaponCategories(weapon);
+            // console.log(weapon["Key"] + ": " + weapon["Categories"]);
+        }, {concurrency: 1}).then(function () {
+            console.log(weaponsAdded + " weapons added.");
+            // console.log(weaponSourcesAdded + " weapon sources added.");
+            // console.log(weaponCatsAdded + " weapons categories added.");
+        });
     });
 });
 
@@ -43,8 +45,6 @@ function addWeapon(weapon: any) {
     return new Promise(function (resolve) {
         try {
             let isWeaponAdded: boolean = false; // used for the resolve
-            console.log("Attempting to add " + weapon["Name"][0] + " as ID " + (weaponsAdded + 1));  // the [0] gets the value, instead of including all the [''] junk
-
             let Key = weapon["Key"];  // get the key first, as we use it to check if the weapon exists already
 
             getWeaponID(Key[0]).then(function (weaponID) {
@@ -71,12 +71,14 @@ function addWeapon(weapon: any) {
                         "('" + Key + "', '" + Name + "', '" + Description + "', '" + Type + "', '" + Encumbrance + "', '" + HP + "', '" + Price + "', '" + Rarity + "', '" + Restricted + "', '" + SkillKey + "', '" + Damage + "', '" + DamageAdd + "', '" + Crit + "', '" + SizeLow + "', '" + SizeHigh + "', '" + RangeValue + "');";
 
 
-                    console.log("Adding weapon with key " + Key);
-                    // console.log(query);
-                    // SQL.insertIntoDatabase(query);
+                    console.log("Attempting to add " + weapon["Name"][0] + " as ID " + (weaponsAdded + 1));
 
-                    isWeaponAdded = true;
-                    weaponsAdded++;
+                    console.log("Adding weapon with key " + Key);
+                    SQL.insertIntoDatabase(query).then(function (resolved) {
+                        isWeaponAdded = true;
+                        weaponsAdded++;
+                        resolve(resolved);
+                    });
                 } else {
                     console.log("Weapon with key " + Key + " already exists with ID " + weaponID);
                 }
